@@ -1,0 +1,12 @@
+#start
+PSH 1
+PSH 2
+ADD
+STR A
+LOG A
+IF A 3 17
+SET B 1
+LOG B
+SET B 0
+LOG B
+EXT
