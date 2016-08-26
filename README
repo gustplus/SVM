@@ -1,0 +1,22 @@
+the name SVM is short for "Shizhan's Virtual Machine".
+
+parser.c parse the code you write into the format the VM can execute,
+and the tinyVM.c is the VM itself
+
+by now, the VM has the following instructions:
+	PSH,	//push $num (push $num to the stack)
+	POP,	//pop (pop the top of the stack)
+	ADD,	//add (add the top two values of the stack and push the result to the stack, the added values will be removed)
+	SUB,	//sub
+	MUL,	
+	DIV,
+	MOV,	//MOV $register0 $register1
+	SET,	//SET $register $num
+	IF,	//IF $register $statement $jump_idx
+	IFN,	//IFN $register $statement $jump_idx
+//	FI,	//end if
+	STR,	//STR $register (set the register's value with the value of the top of stack)
+	RTS,	//RTS $register (push the register's value to the top of stack)
+	LOG,	//LOG $register (print the value of the $register)
+	EXT,	//exit
+

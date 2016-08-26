@@ -1,0 +1,18 @@
+#start
+SET F 2
+SET E 2
+WLN E 0
+IF F 2
+SET D 1
+LOG D
+FI
+IFN F 2
+SET D 0
+LOG D
+FI
+RTS E
+PSH 1
+SUB
+STR E
+LW
+EXT
