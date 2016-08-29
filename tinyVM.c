@@ -31,7 +31,8 @@ static void init_vm() {
 
 static void print_program() {
 	printf("instruction: %d\n", instruction_count);
-	for(int i = 0; i < instruction_count; ++i) {
+	int i = 0;
+	for(; i < instruction_count; ++i) {
 		printf("%d\n", program[i]);
 	}
 	printf("instruction end\n");
