@@ -3,10 +3,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define TRUE 1
-#define FALSE 0
 #define STACK_SIZE 64
-typedef int bool;
+
+//#define DEBUG_MODE
 
 #define SP (registers[SP])
 #define IP (registers[IP])
@@ -61,6 +60,7 @@ static void load_program(const char *file_name) {
 	if(f) {
 		while(read_item(f)) {}
 	}else{
+		printf("can't load %s, please check if the file is exist\n", file_name);
 		running = FALSE;
 	}
 }
@@ -71,62 +71,89 @@ static bool eval(item_t order) {
 	bool no_jmp = TRUE;
 	switch(order) {
 		case PSH: {
-	//		printf("PSH %d\n", program[IP + 1]);
+#ifdef DEBUG_MODE
+			printf("PSH %d\n", program[IP + 1]);
+#endif
 			stack[++SP] = program[++IP];
 			break;
 		}
 		case POP: {
-	//		printf("POP\n");
+#ifdef DEBUG_MODE
+			printf("POP\n");
+#endif
 			--SP;
 			break;
 		}
 		case LOG: {
-			printf("log%d\n", registers[program[++IP]]);
+			printf("%d\n", registers[program[++IP]]);
 			break;
 		}
 		case ADD: {
-	//		printf("ADD\n");
-			registers[A] = stack[SP--];
-			registers[B] = stack[SP];
-			registers[C] = registers[A] + registers[B];
-			stack[SP] = registers[C];
+			registers[EXA] = stack[SP--];
+			registers[EXB] = stack[SP];
+			registers[EXC] = registers[EXA] + registers[EXB];
+			stack[SP] = registers[EXC];
+#ifdef DEBUG_MODE
+			printf("ADD %d\n", stack[SP]);
+#endif
 			break;
 		}
 		case SUB: {
-			registers[A] = stack[SP--];
-			registers[B] = stack[SP];
-			registers[C] = registers[A] - registers[B];
-			stack[SP] = registers[C];
+			registers[EXA] = stack[SP--];
+			registers[EXB] = stack[SP];
+			registers[EXC] = registers[EXB] - registers[EXA];
+			stack[SP] = registers[EXC];
+#ifdef DEBUG_MODE
+			printf("SUB %d\n", stack[SP]);
+#endif
 			break;
 		}
 		case MUL: {
-			registers[A] = stack[SP--];
-			registers[B] = stack[SP];
-			registers[C] = registers[A] * registers[B];
-			stack[SP] = registers[C];
+			registers[EXA] = stack[SP--];
+			registers[EXB] = stack[SP];
+			registers[EXC] = registers[EXA] * registers[EXB];
+			stack[SP] = registers[EXC];
+#ifdef DEBUG_MODE
+			printf("MUL %d\n", stack[SP]);
+#endif
 			break;
 		}
 		case DIV: {
-			registers[A] = stack[SP--];
-			registers[B] = stack[SP];
-			registers[C] = registers[A] / registers[B];
-			stack[SP] = registers[C];
+			registers[EXA] = stack[SP--];
+			registers[EXB] = stack[SP];
+			registers[EXC] = registers[EXB] / registers[EXA];
+			stack[SP] = registers[EXC];
+#ifdef DEBUG_MODE
+			printf("DIV %d\n", stack[SP]);
+#endif
 			break;
 		}
 		case MOV: {
+#ifdef DEBUG_MODE
+			printf("MOV\n");
+#endif
 			registers[program[IP + 2]] = registers[program[IP + 1]];
 			IP += 2;
 			break;
 		}
 		case SET: {
 			registers[program[IP + 1]] = program[IP + 2];
+#ifdef DEBUG_MODE
+			printf("SET %d\n", program[IP + 2]);
+#endif
 			IP += 2;
 			break;
 		}
 		case IF: {
+#ifdef DEBUG_MODE
+			printf("IF\n");
+			printf("%d == %d\n", registers[program[IP + 1]], program[IP + 2]);
+#endif
 			if(registers[program[IP + 1]] == program[IP + 2]) {
 				IP = program[IP + 3];
-	//			printf("ip = %d\n", IP);
+#ifdef DEBUG_MODE
+				printf("JMP %d\n", IP);
+#endif
 				no_jmp = FALSE;
 			}else{
 				IP += 3;
@@ -134,28 +161,47 @@ static bool eval(item_t order) {
 			break;
 		}
 		case IFN: {
+#ifdef DEBUG_MODE
+			printf("IFN\n");
+			printf("%d != %d\n", registers[program[IP + 1]], program[IP + 2]);
+#endif
 			if(registers[program[IP + 1]] != program[IP + 2]) {
 				IP = program[IP + 3];
-	//			printf("ip = %d\n", IP);
+#ifdef DEBUG_MODE
+				printf("JMP %d\n", IP);
+#endif
 				no_jmp = FALSE;
 			}else{
 				IP += 3;
-	//			printf("ip = %d\n", IP);
 			}
 			break;
 		}
+		case JMP: {
+			IP = program[IP + 1];
+#ifdef DEBUG_MODE
+			printf("JMP %d\n", IP);
+#endif
+			no_jmp = FALSE;
+			break;
+		}
 		case STR: {
-	//		printf("STR %d\n", stack[SP]);
+#ifdef DEBUG_MODE
+			printf("STR %d\n", stack[SP]);
+#endif
 			registers[program[++IP]] = stack[SP];
 			break;
 		}
 		case RTS: {
-	//		printf("RTS\n");
+#ifdef DEBUG_MODE
+			printf("RTS %d\n", registers[program[IP + 1]]);
+#endif
 			stack[++SP] = registers[program[++IP]];
 			break;
 		}
 		case EXT: {
-	//		printf("EXT\n");
+#ifdef DEBUG_MODE
+			printf("EXT\n");
+#endif
 			running = FALSE;
 			break;
 		}
@@ -176,7 +222,9 @@ int main(int argc, const char **argv) {
 	if(argc > 1) {
 		init_vm();
 		load_program(argv[1]);
-	//	print_program();
+#ifdef DEBUG_MODE
+		print_program();
+#endif
 		run_program();
 	}
 	return 0;
