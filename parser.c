@@ -10,8 +10,8 @@ static FILE *src_f = NULL;
 static FILE *dst_f = NULL;
 
 item_t parse_instruction(int line, const char *code_name) {
-	for(item_t i = 0; i < ORDER_COUNT; ++i) {
-		const char *it = ORDER_STRS[i];
+	for(item_t i = 0; i < INSTRUCTION_COUNT; ++i) {
+		const char *it = INSTRUCTION_STRS[i];
 		if(0 == strcmp(it, code_name)) {
 			return i;
 		}

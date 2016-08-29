@@ -128,6 +128,22 @@ static bool eval(item_t order) {
 #endif
 			break;
 		}
+		case CMP: {
+			registers[EXA] = stack[SP--];
+			registers[EXB] = stack[SP];
+			if(registers[EXB] > registers[EXA]) {
+				registers[EXC] = 1;
+			}else if(registers[EXB] == registers[EXA]) {
+				registers[EXC] = 0;
+			}else{
+				registers[EXC] = -1;
+			}
+			stack[SP] = registers[EXC];
+#ifdef DEBUG_MODE
+			printf("CMP %d %d %d\n", registers[EXB], registers[EXA], stack[SP]);
+#endif
+			break;
+		}
 		case MOV: {
 #ifdef DEBUG_MODE
 			printf("MOV\n");

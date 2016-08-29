@@ -1,10 +1,13 @@
 #loop test
 SET A 0
-IF A 10 18
+WLN A 10
 LOG A
 RTS A
 PSH 1
 ADD
 STR A
-JMP 3
+LW
+
+SET A 100
+LOG A
 EXT

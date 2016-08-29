@@ -24,13 +24,14 @@ char* REGISTER_STRS[] = {
 
 #define REG_REGISTER_COUNT SP
 
-typedef enum ORDERS {
+typedef enum INSTRUCTIONS {
 	PSH,	//push
 	POP,	//pop
 	ADD,	//add
 	SUB,	//sub
 	MUL,
 	DIV,
+	CMP,	//compare stack[top] stack[top - 1] (> 1, == 0, < -1)
 	MOV,	//MOV register0 register1
 	SET,	//SET register num
 	IF,	//IF register statement jump_idx
@@ -45,16 +46,17 @@ typedef enum ORDERS {
 	LOG,	//LOG register (print register's value)
 	PRT,	//PRT string (print string)
 	EXT,	//exit
-	ORDER_COUNT
-} ORDERS;
+	INSTRUCTION_COUNT
+} INSTRUCTIONS;
 
-char* ORDER_STRS[] = {
+char* INSTRUCTION_STRS[] = {
 	"PSH",
 	"POP",
 	"ADD",
 	"SUB",
 	"MUL",
 	"DIV",
+	"CMP",
 	"MOV",
 	"SET",
 	"IF",
