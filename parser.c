@@ -10,7 +10,8 @@ static FILE *src_f = NULL;
 static FILE *dst_f = NULL;
 
 item_t parse_instruction(int line, const char *code_name) {
-	for(item_t i = 0; i < INSTRUCTION_COUNT; ++i) {
+	item_t i = 0;
+	for(; i < INSTRUCTION_COUNT; ++i) {
 		const char *it = INSTRUCTION_STRS[i];
 		if(0 == strcmp(it, code_name)) {
 			return i;
@@ -21,7 +22,8 @@ item_t parse_instruction(int line, const char *code_name) {
 }
 
 item_t translate_arg(const char *arg) {
-	for(item_t i = 0; i < REG_REGISTER_COUNT; ++i) {
+	item_t i = 0;
+	for(; i < REG_REGISTER_COUNT; ++i) {
 		const char *it = REGISTER_STRS[i];
 		if(0 == strcmp(it, arg)) {
 			return i;
@@ -160,8 +162,9 @@ static void handle_line(item_t instruction, item_t *args, size_t count) {
 	}
 
 	instruction = translate_instruction(instruction);
-
-	for(int i = 0; i < count; ++i) {
+	
+	int i = 0;
+	for(; i < count; ++i) {
 		++ip;
 		push_instruction(args[i]);
 	}
@@ -195,7 +198,8 @@ int main(int argc, const char **argv) {
 				if(check_line(line) && (arg_num = sscanf(line, "%s %s %s %s", str_instruct, str_args[0], str_args[1], str_args[2])) && arg_num) {
 					arg_num -= 1;	//sub str_instruct
 					item_t instruct = parse_instruction(line_idx, str_instruct);
-					for(int idx = 0; idx < arg_num; ++idx) {
+					int idx = 0;
+					for(; idx < arg_num; ++idx) {
 						args[idx] = translate_arg(str_args[idx]);
 					}
 					handle_line(instruct, args, arg_num);
