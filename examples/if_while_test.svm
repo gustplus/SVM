@@ -2,27 +2,24 @@
 SET A 2
 
 WLN A 0
+	PSH 1
+	PSH 2
 
-PSH 3
-PSH 2
+	CMP
+	STR B
 
-CMP
-STR B
+	IF B 1
+		SET C 1
+		LOG C
+	ELSE
+		SET C 0
+		LOG C
+	FI
 
-IF B 1
-SET C 1
-LOG C
-FI
-
-IFN B 1
-SET C 0
-LOG C
-FI
-
-RTS A
-PSH 1
-SUB
-STR A
-POP
+	RTS A
+	PSH 1
+	SUB
+	STR A
+	POP
 LW
 EXT

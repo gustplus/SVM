@@ -36,6 +36,7 @@ typedef enum INSTRUCTIONS {
 	SET,	//SET register num
 	IF,	//IF register statement jump_idx
 	IFN,	//IFN register statement jump_idx
+	ELSE,	//ELSE
 	FI,	//end if
 	WL,	//WL register statement jump_idx (while)
 	WLN,	
@@ -61,6 +62,7 @@ char* INSTRUCTION_STRS[] = {
 	"SET",
 	"IF",
 	"IFN",
+	"ELSE",
 	"FI",
 	"WL",
 	"WLN",

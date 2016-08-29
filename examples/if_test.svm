@@ -5,8 +5,8 @@ ADD
 STR A
 LOG A
 IF A 3
-SET B 1 
-LOG B
+	SET B 1 
+	LOG B
 FI
 SET B 0
 LOG B

@@ -81,27 +81,35 @@ static void check_space(int ip) {
 static void push_instruction(item_t t) {
 	check_space(ip);
 	translate(&t);
+	printf("push[%d]%d\n", ip, t);
 	instructions[ip] = t;
 }
 
 static void set_instruction(int o_ip, item_t t) {
 	check_space(o_ip);
 	translate(&t);
+	printf("set [%d]%d\n", ip, t);
 	instructions[o_ip] = t;
 }
 
 static item_t translate_instruction(item_t instruction) {
 	++ip;
-	if(IF == instruction) {
+	switch(instruction) {
+	case IF:
 		instruction = IFN;
-	}else if (IFN == instruction) {
+		break;
+	case IFN:
 		instruction = IF;
-	}else if(WL == instruction) {	//if is WL/WLN, record the ip of the WL/WLN, because we use JMP to implement the loop statement
+		break;
+	//if is WL/WLN, record the ip of the WL/WLN, because we use IF and JMP to implement the loop statement
+	case WL:
 		PUSH(ip);
 		instruction = IFN;
-	}else if(WLN == instruction){
+		break;
+	case WLN:
 		PUSH(ip);
 		instruction = IF;
+		break;
 	}
 	push_instruction(instruction);
 	return instruction;
@@ -118,11 +126,43 @@ static void handle_statement_end(item_t instruction) {
 		++ip;
 		push_instruction(jmp_ip);
 	}
+	//fill the spaceholder with the next ip addr
 	set_instruction(spaceholder_ip, ip + 1);
+
+	if(ELSE == instruction) {
+			printf("get else\n");
+		item_t if_state = instructions[spaceholder_ip - 3];
+		translate(&if_state);
+		if(if_state == IF) {
+			printf("get if\n");
+			if_state = IFN;
+		}else if(if_state == IFN) {
+			printf("get ifn\n");
+			if_state = IF;
+		}else{
+			printf("fail parser");
+			assert(FALSE);
+		}
+		item_t arg0 = instructions[spaceholder_ip - 2];
+		translate(&arg0);
+		printf("arg0 = %d\n", arg0);
+		item_t arg1 = instructions[spaceholder_ip - 1];
+		translate(&arg1);
+		printf("arg1 = %d\n", arg1);
+		++ip;
+		push_instruction(if_state);
+		++ip;
+		push_instruction(arg0);
+		++ip;
+		push_instruction(arg1);
+		
+		PUSH(++ip);
+		push_instruction(0);
+	}
 }
 
 static void handle_line(item_t instruction, item_t *args, size_t count) {
-	if(FI == instruction || LW == instruction) {
+	if(ELSE == instruction || FI == instruction || LW == instruction) {
 		handle_statement_end(instruction);
 		return;
 	}
@@ -158,6 +198,7 @@ int main(int argc, const char **argv) {
 
 		if(src_f && dst_f) {
 			while(fgets(line, 1025, src_f)) {
+				printf("%s", line);
 				++line_idx;
 				int arg_num = 0;
 				if(check_line(line) && (arg_num = sscanf(line, "%s %s %s %s", str_instruct, str_args[0], str_args[1], str_args[2])) && arg_num) {
