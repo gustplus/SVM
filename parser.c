@@ -90,47 +90,50 @@ static void set_instruction(int o_ip, item_t t) {
 	instructions[o_ip] = t;
 }
 
-static void handle_line(item_t instruction, item_t *args, size_t count) {
-	if(FI == instruction || LW == instruction) {
-		assert(!EMPTY());
-		int spaceholder_ip = POP();
-		if(LW == instruction) {
-			set_instruction(spaceholder_ip, ip + 3);
-			++ip;
-			push_instruction(JMP);
-			assert(!EMPTY());
-			int jmp_ip = POP();
-			++ip;
-			push_instruction(jmp_ip);
-		}else{
-			set_instruction(spaceholder_ip, ip + 1);
-		}
-		return;
-	}
-
+static item_t translate_instruction(item_t instruction) {
 	++ip;
-	bool stat = TRUE;
 	if(IF == instruction) {
 		instruction = IFN;
 	}else if (IFN == instruction) {
 		instruction = IF;
-	}else if(WL == instruction) {	//if is WL/WLN record the ip of the WL/WLN, because we use JMP to implement the loop statement
+	}else if(WL == instruction) {	//if is WL/WLN, record the ip of the WL/WLN, because we use JMP to implement the loop statement
 		PUSH(ip);
 		instruction = IFN;
 	}else if(WLN == instruction){
 		PUSH(ip);
 		instruction = IF;
-	}else{
-		stat = FALSE;
+	}
+	push_instruction(instruction);
+	return instruction;
+}
+
+static void handle_statement_end(item_t instruction) {
+	assert(!EMPTY());
+	int spaceholder_ip = POP();
+	if(LW == instruction) {
+		++ip;
+		push_instruction(JMP);
+		assert(!EMPTY());
+		int jmp_ip = POP();
+		++ip;
+		push_instruction(jmp_ip);
+	}
+	set_instruction(spaceholder_ip, ip + 1);
+}
+
+static void handle_line(item_t instruction, item_t *args, size_t count) {
+	if(FI == instruction || LW == instruction) {
+		handle_statement_end(instruction);
+		return;
 	}
 
-	push_instruction(instruction);
+	instruction = translate_instruction(instruction);
+
 	for(int i = 0; i < count; ++i) {
 		++ip;
 		push_instruction(args[i]);
 	}
-	
-	if(stat) {
+	if(IF == instruction || IFN == instruction) {
 		PUSH(++ip);
 		push_instruction(0);	//as a spaceholder, will be modified when reach FI/LW
 	}
