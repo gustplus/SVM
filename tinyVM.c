@@ -16,25 +16,25 @@ static bool running = FALSE;
 static int *program = NULL;
 static int stack[STACK_SIZE];
 
-static int code_space = 4;
-static int code_count = 0;
+static int instruction_space = 4;
+static int instruction_count = 0;
 
 static void init_vm() {
 	running = TRUE;
 	SP = -1;
 	IP = 0;
-	program = calloc(1, sizeof(item_t) * code_space);
+	program = calloc(1, sizeof(item_t) * instruction_space);
 	if(!program) {
 		running = FALSE;
 	}
 }
 
 static void print_program() {
-	printf("code: %d\n", code_count);
-	for(int i = 0; i < code_count; ++i) {
+	printf("instruction: %d\n", instruction_count);
+	for(int i = 0; i < instruction_count; ++i) {
 		printf("%d\n", program[i]);
 	}
-	printf("code end\n");
+	printf("instruction end\n");
 }
 
 static bool read_item(FILE *f) {
@@ -44,14 +44,14 @@ static bool read_item(FILE *f) {
 		return FALSE;
 	}
 
-	if(code_count + 1 >= code_space) {
-		code_space *= 2;
-		program = realloc(program, code_space * sizeof(item_t));
+	if(instruction_count + 1 >= instruction_space) {
+		instruction_space *= 2;
+		program = realloc(program, instruction_space * sizeof(item_t));
 		assert(program);
 	}
 
 	translate(&ret);
-	program[code_count++] = ret;
+	program[instruction_count++] = ret;
 	return TRUE;
 }
 
@@ -67,9 +67,9 @@ static void load_program(const char *file_name) {
 
 #define FETCH() program[IP]
 
-static bool eval(item_t order) {
+static bool eval(item_t instruction) {
 	bool no_jmp = TRUE;
-	switch(order) {
+	switch(instruction) {
 		case PSH: {
 #ifdef DEBUG_MODE
 			printf("PSH %d\n", program[IP + 1]);
@@ -226,12 +226,13 @@ static bool eval(item_t order) {
 }
 
 static void run_program() {
-	while(running && IP < code_count) {
-		item_t order = FETCH();
-		if(eval(order)) {
+	while(running && IP < instruction_count) {
+		item_t instruction = FETCH();
+		if(eval(instruction)) {
 			++IP;
 		}
 	}
+	free(program);
 }
 
 int main(int argc, const char **argv) {

@@ -43,7 +43,7 @@ static FILE *get_dst_file(const char *src_path) {
 		strncpy(dst_path, src_path, name_len);
 		strcpy(dst_path + name_len, ".o");
 		printf("%s->%s\n", src_path, dst_path);
-		return fopen(dst_path, "w");
+		return fopen(dst_path, "wb");
 	}
 	return NULL;
 }
@@ -53,68 +53,91 @@ static bool check_line(const char *line) {
 	return len != 0 && line[0] != COMMENT_PREFIX && line[0] != '\n';
 }
 
+//use stack to record the position of while/if pos
 #define STACK_SIZE 10
 static long positions[STACK_SIZE];
 static const int item_s = sizeof(item_t);
 static int sp = -1;
-static int item_idx = -1;
 
 #define PUSH(val) (positions[++sp] = val)
 #define POP() (positions[sp--])
 #define EMPTY() (sp == -1)
 #define FULL() (sp == (STACK_SIZE - 1))
 
-void write_to(FILE *f, item_t t) {
+static item_t *instructions;
+static int ip = -1;
+static int instruction_space = 4;
+
+static bool fail_flg = FALSE;
+
+static void check_space(int ip) {
+	if(ip == instruction_space) {
+		instruction_space *= 2;
+		instructions = (item_t *)realloc(instructions, instruction_space * sizeof(item_t));
+		assert(instructions);
+	}
+}
+
+static void push_instruction(item_t t) {
+	check_space(ip);
 	translate(&t);
-	fwrite((void *)&t, 4, 1, f);
+	instructions[ip] = t;
+}
+
+static void set_instruction(int o_ip, item_t t) {
+	check_space(o_ip);
+	translate(&t);
+	instructions[o_ip] = t;
 }
 
 static void handle_line(item_t instruction, item_t *args, size_t count) {
 	if(FI == instruction || LW == instruction) {
 		assert(!EMPTY());
-		int ip = POP();
-		int tmp_pos = ftell(dst_f);
-		fseek(dst_f, ip, SEEK_SET);
-		write_to(dst_f, LW == instruction ? item_idx + 3 : item_idx + 1);
-		fseek(dst_f, tmp_pos, SEEK_SET);
+		int spaceholder_ip = POP();
 		if(LW == instruction) {
-			write_to(dst_f, JMP);
+			set_instruction(spaceholder_ip, ip + 3);
+			++ip;
+			push_instruction(JMP);
 			assert(!EMPTY());
 			int jmp_ip = POP();
-			write_to(dst_f, jmp_ip);
-			item_idx += 2;
+			++ip;
+			push_instruction(jmp_ip);
+		}else{
+			set_instruction(spaceholder_ip, ip + 1);
 		}
 		return;
 	}
 
-	++item_idx;
+	++ip;
 	bool stat = TRUE;
 	if(IF == instruction) {
 		instruction = IFN;
 	}else if (IFN == instruction) {
 		instruction = IF;
-	}else if(WL == instruction) {
-		PUSH(item_idx);
+	}else if(WL == instruction) {	//if is WL/WLN record the ip of the WL/WLN, because we use JMP to implement the loop statement
+		PUSH(ip);
 		instruction = IFN;
 	}else if(WLN == instruction){
-		PUSH(item_idx);
+		PUSH(ip);
 		instruction = IF;
 	}else{
 		stat = FALSE;
 	}
 
-	
-	write_to(dst_f, instruction);
+	push_instruction(instruction);
 	for(int i = 0; i < count; ++i) {
-		++item_idx;
-		write_to(dst_f, args[i]);
+		++ip;
+		push_instruction(args[i]);
 	}
 	
 	if(stat) {
-		++item_idx;
-		PUSH(ftell(dst_f));
-		write_to(dst_f, 0);
+		PUSH(++ip);
+		push_instruction(0);	//as a spaceholder, will be modified when reach FI/LW
 	}
+}
+
+static void write_to_file() {
+	fwrite(instructions, (ip + 1) * sizeof(item_t), 1, dst_f);
 }
 
 int main(int argc, const char **argv) {
@@ -127,6 +150,8 @@ int main(int argc, const char **argv) {
 		char str_args[3][10];
 		item_t args[3];
 		int line_idx = 0;
+
+		instructions = calloc(1, instruction_space * sizeof(item_t));
 
 		if(src_f && dst_f) {
 			while(fgets(line, 1025, src_f)) {
@@ -143,8 +168,9 @@ int main(int argc, const char **argv) {
 			}
 		}
 		fclose(src_f);
-		fclose(dst_f);
 		assert(EMPTY());
+		write_to_file();
+		fclose(dst_f);
 	}else{
 		printf("command not match: src_file\n");
 	}
