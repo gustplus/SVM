@@ -12,9 +12,13 @@ by now, the VM has the following instructions:
 	DIV,
 	MOV,	//MOV $register0 $register1
 	SET,	//SET $register $num
-	IF,	//IF $register $statement $jump_idx
-	IFN,	//IFN $register $statement $jump_idx
-//	FI,	//end if
+	IF,	//IF $register $statement [$jump_idx]
+	IFN,	//IFN $register $statement [$jump_idx]
+	WL,	//WL $register $statement (while)
+	WLN,	//(while not)
+	LW,	//(end while)
+	ELSE
+	FI,	//end if
 	STR,	//STR $register (set the register's value with the value of the top of stack)
 	RTS,	//RTS $register (push the register's value to the top of stack)
 	LOG,	//LOG $register (print the value of the $register)
