@@ -179,7 +179,7 @@ static void write_to_file() {
 }
 
 int main(int argc, const char **argv) {
-	if(argc > 1) {
+	if(2 == argc) {
 		const char *src = argv[1];
 		src_f = fopen(src, "r");
 		dst_f = get_dst_file(src);

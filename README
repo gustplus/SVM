@@ -1,26 +1,38 @@
-the name SVM is short for "Shizhan's Virtual Machine".
+------------------------------------------------------------------------
+This is the project README file. Here, you should describe your project.
+Tell the reader (someone who does not know anything about this project)
+all he/she needs to know. The comments should usually include at least:
+------------------------------------------------------------------------
 
-parser.c parse the code you write into the format the VM can execute,
-and the tinyVM.c is the VM itself
+PROJECT TITLE: SVM
+PURPOSE OF PROJECT:a tiny VM
+VERSION or DATE:0.1
+HOW TO START THIS PROJECT: run make
+AUTHORS:gustplus
+USER INSTRUCTIONS:
+	the name SVM is short for "Shizhan's Virtual Machine".
 
-by now, the VM has the following instructions:
-	PSH,	//push $num (push $num to the stack)
-	POP,	//pop (pop the top of the stack)
-	ADD,	//add (add the top two values of the stack and push the result to the stack, the added values will be removed)
-	SUB,	//sub
-	MUL,	
-	DIV,
-	MOV,	//MOV $register0 $register1
-	SET,	//SET $register $num
-	IF,	//IF $register $statement [$jump_idx]
-	IFN,	//IFN $register $statement [$jump_idx]
-	WL,	//WL $register $statement (while)
-	WLN,	//(while not)
-	LW,	//(end while)
-	ELSE
-	FI,	//end if
-	STR,	//STR $register (set the register's value with the value of the top of stack)
-	RTS,	//RTS $register (push the register's value to the top of stack)
-	LOG,	//LOG $register (print the value of the $register)
-	EXT,	//exit
+	parser.c parse the code you write into the format the VM can execute,
+	and the tinyVM.c is the VM itself
 
+	by now, the VM has the following instructions:
+		PSH,	//push $num (push $num to the stack)
+		POP,	//pop (pop the top of the stack)
+		ADD,	//add (add the top two values of the stack and push the result to the stack, the added values will be removed)
+		SUB,	//sub
+		MUL,	
+		DIV,
+		MOV,	//MOV $register0 $register1
+		SET,	//SET $register $num
+		CMP,	//CMP $stack[top-1] $stack[top]
+		IF,	//IF $register $statement [$jump_idx]
+		IFN,	//IFN $register $statement [$jump_idx]
+		WL,	//WL $register $statement (while)
+		WLN,	//(while not)
+		LW,	//(end while)
+		ELSE
+		FI,	//end if
+		STR,	//STR $register (set the register's value with the value of the top of stack)
+		RTS,	//RTS $register (push the register's value to the top of stack)
+		LOG,	//LOG $register (print the value of the $register)
+		EXT,	//exit
